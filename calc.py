@@ -11,45 +11,33 @@ operators = {
 
 def prefix_calculator(line):
     """
-    Calculate result for a prefix string. The input is traversed in reverse order,
-    if an operator is enountered it is used with the two elements to it's right as input.
+    Calculate result for a prefix string. The input is traversed in reverse order.
+    If a number is encountered it is added to the number stack,
+    if an operator is enountered it is used with the two next two elements from the number queue.
     :param line: Input string in prefix format
     :return: Result in float format
     """
-    # Split string into list
-    calculator_queue = line.split(" ")
-    # Index for traversing queue, traversing in reverse
-    reverse_idx = -1
-    # Keep traversing queue as long as there's 3 or more elements left
-    while len(calculator_queue) >= 3:
-        # Get current element
-        element = calculator_queue[reverse_idx]
-        # Check if element is a mathematical operator
+    # Split input string into list
+    split_prefix_line = line.split(" ")
+    # Stack of numbers, add to this when encountering any number or when a number result has been calculated
+    number_stack = []
+    # Loop through split prefix string in reverse order
+    for element in reversed(split_prefix_line):
         if element in operators:
             # Get operator python function from operator string
             op = operators[element]
-            # Get first input to op, one step right of op. Cast to float
-            n1 = float(calculator_queue[reverse_idx+1])
-            # Get first input to op, two steps right of op. Cast to float
-            n2 = float(calculator_queue[reverse_idx+2])
+            # Get first input to op, first number in the number stack
+            n1 = number_stack.pop()
+            # Get second input to op, second number in the number stack
+            n2 = number_stack.pop()
             # Calculate op result for n1 and n2
             result = op(n1, n2)
-            # Current op index replaced with op result
-            calculator_queue[reverse_idx] = result
-            # n1 removed from queue
-            del calculator_queue[reverse_idx+1]
-            # n2 removed from queue
-            del calculator_queue[reverse_idx+2]
-            # Increase traversal index by 1.
-            # This ensures the index is in the correct position next iteration.
-            # If we have for example [.. A + B C] we would in this case be in index -3
-            # Removing B and C and replacing + with the op result we now want to be
-            # in the index of A, which is -2.
-            reverse_idx += 1
+            # Add result to number stack
+            number_stack.append(result)
         else:
-            # If no op encountered traversal continues to the left
-            reverse_idx -= 1
-    return calculator_queue[0]
+            number_stack.append(float(element))
+    # Return last number in number stack, which holds current result
+    return number_stack[0]
 
 
 def infix_to_prefix(line):
